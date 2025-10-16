@@ -1,0 +1,17 @@
+
+facilities: 10
+sensors_per_facility: 5
+ingest:
+  raw_dir: data/raw
+  bronze_dir: data/bronze
+modeling:
+  forecast_horizon: 24        # time steps
+  history_hours: 72
+  spike_threshold_std: 2.0    # z-score threshold for spike
+alerts:
+  consecutive_spikes: 2
+  actions:
+    - type: log
+      target: stdout
+dashboard:
+  default_facility: F-001

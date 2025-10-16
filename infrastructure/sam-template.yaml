@@ -1,0 +1,53 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Energy Monitoring & Optimization - Reference
+
+Resources:
+  RawBucket:
+    Type: AWS::S3::Bucket
+
+  BronzeBucket:
+    Type: AWS::S3::Bucket
+
+  Stream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      ShardCount: 1
+
+  FirehoseToS3:
+    Type: AWS::KinesisFirehose::DeliveryStream
+    Properties:
+      DeliveryStreamType: KinesisStreamAsSource
+      KinesisStreamSourceConfiguration:
+        KinesisStreamARN: !GetAtt Stream.Arn
+        RoleARN: arn:aws:iam::123456789012:role/FirehoseAccessRole
+      S3DestinationConfiguration:
+        BucketARN: !GetAtt BronzeBucket.Arn
+        RoleARN: arn:aws:iam::123456789012:role/FirehoseAccessRole
+
+  PredictorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: predictor_lambda.handler
+      Runtime: python3.11
+      CodeUri: ../src/
+      MemorySize: 512
+      Timeout: 30
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+  AlertsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: facility_id
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: facility_id
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
