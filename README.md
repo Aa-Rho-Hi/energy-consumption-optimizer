@@ -1,5 +1,5 @@
 
-# Energy Consumption Monitoring & Optimization
+# EnergiFlow
 
 **Stack:** AWS IoT (design + optional SAM template), Python, Machine Learning (scikit-learn), Data Visualization (Streamlit), Automation (alerting rules).
 
